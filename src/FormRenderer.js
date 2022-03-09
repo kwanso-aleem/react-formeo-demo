@@ -1,32 +1,39 @@
-import React, { createRef, useEffect } from 'react';
+import React, { createRef, useEffect,useMemo } from 'react';
 
 import { FormeoRenderer } from 'formeo';
 
+
+const getFormRender =(ref)=>{
+  return new FormeoRenderer({
+    renderContainer: ref.current,
+    // formeoLoaded: true,
+    allowEdit: true,
+    sessionStorage: true,
+    events: {
+      onUpdate: (event)=>{
+       const data = event.formData
+      
+        console.log('json', data)
+      
+        debugger
+        
+      }
+    },
+  });
+}
+
+
 export const FormRenderer = ({ formData }) => {
+ 
    
   const rendererRef = createRef();
 
+const renderer =  useMemo(() => getFormRender(rendererRef) , [rendererRef])
+ 
+
   useEffect(() => {
-    const renderer = new FormeoRenderer({
-      renderContainer: rendererRef.current,
-      formeoLoaded: true,
-      allowEdit: true,
-      sessionStorage: true,
-      events: {
-        onUpdate: (event)=>{
-         const data = event.formData
-        
-          console.log('json', data)
-        
-          debugger
-          
-        }
-      },
-    });
-  
-    document.addEventListener('formeo-render', handleUpdate, false)
     JSON.stringify(formData) && renderer.render(formData);
-  }, [rendererRef]);
+  }, [formData]);
 
   const handleUpdate = ({ detail: { formData } }) => {
     debugger
@@ -40,6 +47,7 @@ export const FormRenderer = ({ formData }) => {
 
   const handleSubmit=(e)=>{
     e.preventDefault()
+    renderer.onUpdate()
     debugger
     console.log('form editor render',rendererRef.current.onUpdate())
   }
